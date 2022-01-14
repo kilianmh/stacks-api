@@ -1,0 +1,92 @@
+= cl-stacks-api
+Kilian M. Haemmerle <kilian.haemmerle@protonmail.com>
+:descricption: Stacks Blockchain 2.0 API
+:repository-url: https://codeberg.org/kilianmh/cl-stacks-api.git
+:library: cl-stacks-api
+:stacks-homepage: https://www.stacks.co/
+:api-architecture: https://raw.githubusercontent.com/hirosystems/stacks-blockchain-api/master/api-architecture.png
+:api-docs: https://docs.hiro.so/get-started/stacks-blockchain-api
+:api-reference: https://docs.hiro.so/api
+:asdf-config: https://common-lisp.net/project/asdf/asdf/Configuring-ASDF-to-find-your-systems.html
+:naming-guideline: https://lisp-lang.org/style-guide/#naming
+:run-api-node: https://docs.hiro.so/get-started/running-api-node
+:open-api-specification-file: https://github.com/hirosystems/stacks-blockchain-api/blob/master/docs/openapi.yaml
+:hiro: https://www.hiro.so/
+:official-client: https://github.com/hirosystems/stacks-blockchain-api/tree/master/client
+:available-updates: https://github.com/hirosystems/stacks-blockchain-api/tree/master/client#Available-Updates
+:toc: macro
+:toc-title:
+
+= Common Lisp Stacks API Client (cl-stacks-api)
+
+toc::[]
+
+The main repository is on {repository-url}[Codeberg]. 
+if you are viewing this anywhere else, it is just a mirror. Please use the {repository-url}[Codeberg] repository for pull requests and issues. Thank you.
+
+== Documentation
+
+This is a Common Lisp Stacks API Client Library, 
+hosted by {hiro}[Hiro]. The official Documentation can be found on {api-docs}[here^].
+image:{api-architecture}[]
+
+== Installation
+
+This program is not yet on quicklisp/ultralisp. 
+Therefore you need to download and load it via quicklisp / asdf e.g. from the local-project folder.
+
+== Usage
+
+The queries from the {api-reference}[API
+references] are transferred to functions according to the {naming-guideline}[Naming Guidelines]:
+lowercase and separated by single dashes (-).
+
+=== Nicknames
+
+Main package nickname is "stacks-user".
+
+If you want only functions from specific areas,
+additional local package nicknames exist:
+
+* stacks/accounts
+* stacks/blocks
+* stacks/faucets
+* stacks/fees
+* stacks/fungible-tokens
+* stacks/info
+* stacks/microblocks
+* stacks/names
+* stacks/rosetta
+* stacks/search
+* stacks/stacking-rewards
+* stacks/smart-contracts
+* stacks/transactions
+
+=== Networks
+
+All functions (except the faucet) interact with the mainnet. 
+For querying the testnet, add keyword :network "testnet" to any function.
+
+== ToDo
+* support all features of {official-client}[official Javascript/Typescript Client]
+** Missing Rest API requests
+*** faucets: get-btc-tokens
+*** fees: fetch-fee-rate
+*** transactions: broadcast-raw-transaction
+*** smart-contracts: get-specific-data-map-inside-contract, call-read-only-function, not working: get-contract-source)
+*** rosetta: (everything except get-list-of-available-networks)
+*** names: (missing: get-name-history, get-all-subdomains)
+*** non-fungible-tokens: non-fungible-tokens-metadata-list, non-fungible-tokens-metadata-for-contract-id
+** Subscribe to WebSockets or Socket.io for real-time Stacks {available-updates}[updates]
+** Full type safety for WebSocket and API requests and responses
+* conditioned error responses
+* connect a {run-api-node}[local api node]
+* automatically generate client updates from {open-api-specification-file}[OpenAPI specification file]
+
+== Copyright
+
+(C) 2021 Kilian M. Haemmerle (kilian.haemmerle@protonmail.com)
+
+== License
+
+Licensed under the AGPLv3 License.
