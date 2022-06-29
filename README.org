@@ -1,0 +1,339 @@
+* Common Lisp Stacks API Client (stacks-api)
+
+The main repository of this library is hosted on [[https://codeberg.org/kilianmh/stacks-api.git][Codeberg]].
+If you are viewing this anywhere else, it is just a mirror. Please use the
+[[https://codeberg.org/kilianmh/stacks-api.git][Codeberg repository]] for collaboration. Thank you!
+
+** Documentation
+This is a Common Lisp Client for the Stacks [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST API]],
+hosted by [[https://www.hiro.so/][Hiro]].
+The official Documentation can be found on [[https://hirosystems.github.io/stacks-blockchain-api/][here]].
+
+** Main Features:
+
+- execute (almost) all GET requests and get-stx-testnet-tokens faucet.
+- network support: mainnet (default) and testnet
+- output types: hash-table (default), json, alist
+- static type checking & further input validation
+
+#+CAPTION: Stacks 2.0 API Architecture
+#+NAME: api-architecture
+[[https://raw.githubusercontent.com/hirosystems/stacks-blockchain-api/master/api-architecture.png]]
+
+** Installation
+
+This library is not yet on quicklisp/ultralisp.
+You need to put it in the local-project folder visible to quicklisp
+and then load it via:
+#+begin_src lisp
+  (ql:quickload :stacks-api)
+#+end_src
+
+Alternatively, you can load it with asdf:load-system.
+However then you need to manually make sure all dependencies are installed before.
+
+** Usage
+*** Naming
+Main package nickname is "stacks".
+
+The API request-functions from the [[https://hirosystems.github.io/stacks-blockchain-api/][API references]] are
+transferred to names according to the
+[[https://lisp-lang.org/style-guide/#naming][Lisp Naming Guidelines]]:
+lowercase and separated by single dashes (-). The parameters are same as in the API reference:
+lower-case and with underscore. Only the array-parameter (type, tx_id, asset_identifiers) have a [] at the end:
+(tx_id[], type[] asset_identifiers[]).
+
+*** Types
+
+Inputs are statically type-checked at run time by default.
+Additional input validation is implemented for certain parameters.
+Array parameters need to be supplied as quoted list (see examples).
+All numbers are non-negative / positive integers. Boolean values are t or nil as usual in lisp.
+
+*** Network
+By default, functions query the mainnet (exemption: get-stx-testnet-tokens).
+You can change the network by setting the global variable *network/ast to "testnet" (or "mainnet").
+#+begin_src lisp
+  (setf *network* "testnet")
+#+end_src
+
+*** Output
+Default output type is hash-table. Other options are alist, or (raw) json.
+The setting can be adjusted with the global variable *output/ast .
+#+begin_src lisp
+  (setf *output* :json)
+#+end_src
+
+** Example Queries
+#+begin_src lisp
+  (in-package :stacks-api)
+#+end_src
+
+*** Accounts
+#+begin_src lisp
+  (get-account-balances "SP31DA6FTSJX2WGTZ69SFY11BH51NZMB0ZW97B5P0.get-info"
+                        :until_block "64500")
+#+end_src
+#+begin_src lisp
+  (get-account-stx-balances "SP31DA6FTSJX2WGTZ69SFY11BH51NZMB0ZW97B5P0.get-info"
+                            :until_block "65000")
+#+end_src  
+#+begin_src lisp :results scalar
+  (get-account-transactions "SP5C5J1AVSD63C0PEH965TGFDT1CQWFJY37DTZW5"
+                            :limit 10
+                            :offset 1
+                            :height 1000
+                            :unanchored nil)
+#+end_src
+#+begin_src lisp
+  (get-account-transaction-information-for-specific-transaction
+   "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.staking-helper"
+   "0x0356c8a0662be5186652bcf70669471c65829400479caef769d5b2d0db871d31")
+#+end_src
+#+begin_src lisp
+  (get-account-transactions-including-stx-transfers-for-each-transaction
+   "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9")
+#+end_src
+#+begin_src lisp
+  (get-the-latest-nonce-used-by-an-account
+   "SP3E1NPCV8QE4DXPC618VFW3ZFA8QPBD8HCS22KF2")
+#+end_src
+#+begin_src lisp
+  (get-account-assets "SP1Z92MPDQEWZXW36VX71Q25HKF5K2EPCJ304F275")
+#+end_src
+#+begin_src lisp
+  (get-inbound-stx-transfers "SP1Z92MPDQEWZXW36VX71Q25HKF5K2EPCJ304F275")
+#+end_src
+#+begin_src lisp
+  (get-account-info "SP1TCA7QER9J9NKCKBB78K48TADDFC2GXYM3QQV3X")
+#+end_src    
+#+begin_src lisp
+  (get-mempool-transactions :recipient_address "SP5C5J1AVSD63C0PEH965TGFDT1CQWFJY37DTZW5")
+#+end_src
+
+*** Blocks
+#+begin_src lisp
+  (get-recent-blocks :offset 10)
+#+end_src
+#+begin_src lisp
+  (get-block-by-hash "0x8c1100bc445873c53eeb5446946c97a70114c7fa8624aa7f8fd73cd3ebb51246")
+#+end_src  
+#+begin_src lisp
+  (get-block-by-height 1000)
+#+end_src  
+#+begin_src lisp
+  (get-block-by-burnchain-block-hash "0x0000000000000000000469320514f215cf176237696d0f8be97cad0a8de1b5d7")
+#+end_src
+#+begin_src lisp
+  (get-block-by-burnchain-height 742673)
+#+end_src    
+*** Faucets
+#+begin_src lisp
+  (get-stx-testnet-tokens :address "your-testnet-adddress")
+#+end_src
+*** Fees
+#+begin_src lisp
+  (get-estimated-fee)
+#+end_src
+*** Fungible Tokens
+#+begin_src lisp
+  (fungible-tokens-metadata-list)
+#+end_src
+#+begin_src lisp
+  (fungible-tokens-metadata-for-contract-id "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.usda-token")
+#+end_src
+
+*** Info
+#+begin_src lisp
+  (get-core-api-info)
+#+end_src
+#+begin_src lisp
+  (api-status)
+#+end_src
+#+begin_src lisp
+  (get-the-network-target-block-time)
+#+end_src
+#+begin_src lisp
+  (get-a-given-network-target-block-time "mainnet")
+#+end_src
+#+begin_src lisp
+  (get-total-and-unlocked-stx-supply :height 12000)
+#+end_src
+#+begin_src lisp
+  (get-total-stx-supply-in-plain-text-format)
+#+end_src
+#+begin_src lisp
+  (get-circulating-stx-supply-in-plain-text-format)
+#+end_src
+#+begin_src lisp
+  (get-total-and-unlocked-stx-supply-legacy)
+#+end_src
+#+begin_src lisp
+  (get-proof-of-transfer-details)
+#+end_src 
+*** Microblocks
+#+begin_src lisp
+  (get-recent-microblocks)
+#+end_src
+#+begin_src lisp
+  (get-microblock "0x72f05f5135caf2a17c8a993e7357072d7a91f1f74925543b12b93c22181b396d")
+#+end_src
+#+begin_src lisp
+  (get-the-list-of-current-transactions-that-belong-to-unanchored-microblocks)
+#+end_src   
+*** Names
+#+begin_src lisp
+  (get-namespace-price "app")
+#+end_src  
+#+begin_src lisp
+  (get-name-price "100.btc")
+#+end_src
+#+begin_src lisp
+  (get-all-namespaces)
+#+end_src
+#+begin_src lisp
+  (get-namespace-names "btc")
+#+end_src
+#+begin_src lisp
+  (get-all-names)
+#+end_src
+#+begin_src lisp
+  (get-name-details "100.btc")
+#+end_src
+#+begin_src lisp
+  (get-zone-file "11street.btc")
+#+end_src
+#+begin_src lisp
+  (get-names-owned-by-address "stacks" "SP3PW4MC0CZE0FY7MFTKGM7C2DCCXZ24SD0JWJTFT")
+#+end_src
+
+*** Non-Fungible Tokens
+#+begin_src lisp
+  (non-fungible-token-holdings
+   :principal "SPNWZ5V2TPWGQGVDR6T7B6RQ4XMGZ4PXTEE0VQ0S.marketplace-v3"
+   :asset_identifiers[] '("SPQZF23W7SEYBFG5JQ496NMY0G7379SRYEDREMSV.Candy::candy"))
+#+end_src
+#+begin_src lisp
+  (non-fungible-token-history
+   :asset_identifier "SP2X0TZ59D5SZ8ACQ6YMCHHNR2ZN51Z32E2CJ173.the-explorer-guild::The-Explorer-Guild"
+   :value "0x0100000000000000000000000000000803")
+#+end_src
+#+begin_src lisp
+  (non-fungible-token-mints
+   :asset_identifier "SP2X0TZ59D5SZ8ACQ6YMCHHNR2ZN51Z32E2CJ173.the-explorer-guild::The-Explorer-Guild")
+#+end_src
+
+*** Search
+#+begin_src lisp
+  (search "0x589f73b5cb3f14ae96a9413dfc78fe2e59eff6bd4ddfe76746578884246dd63f")
+#+end_src
+
+*** Smart Contracts
+#+begin_src lisp
+  (get-contract-info "SP213KNHB5QD308TEESY1ZMX1BP8EZDPG4JWD0MEA.web4")
+#+end_src
+#+begin_src lisp
+  (get-contract-events "SP000000000000000000002Q6VF78.genesis")
+#+end_src
+#+begin_src lisp
+  (get-contract-interface "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9" "collateral-rebalancing-pool-v1")
+#+end_src  
+#+begin_src lisp
+  (get-contract-source "SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9" "nft-trait"
+                       :proof 0)
+#+end_src
+*** Stacking Rewards
+#+begin_src lisp
+  (get-recent-reward-slot-holders)
+#+end_src
+#+begin_src lisp
+  (get-recent-reward-slot-holder-entries-for-the-given-address "1BFfc2e6Kk82ut7S3C5yaN3pWRxEFRLLu5")
+#+end_src
+#+begin_src lisp
+  (get-recent-burnchain-reward-recipients)
+#+end_src
+#+begin_src lisp
+  (get-recent-burnchain-reward-for-the-given-recipient "1BFfc2e6Kk82ut7S3C5yaN3pWRxEFRLLu5")
+#+end_src
+#+begin_src lisp
+  (get-total-burnchain-rewards-for-the-given-recipient "1BFfc2e6Kk82ut7S3C5yaN3pWRxEFRLLu5")
+#+end_src
+
+*** Transactions
+#+begin_src lisp
+  (get-recent-transactions
+   :type[] '("coinbase" "contract_call"))
+#+end_src
+#+begin_src lisp
+  (get-mempool-transactions)
+#+end_src
+#+begin_src lisp
+  (get-dropped-mempool-transactions)
+#+end_src
+#+begin_src lisp
+  (get-list-of-details-for-transactions
+   :tx_id[] '("0xea052bfb2b80732f392e1a16be30be41d84b8bc1bdcf259f58f4b1b5339de452"
+              "0x8506a60971a586dcfaf01d758e9ff34d3b2fcd4ffea655e3ca759cbe18a6e4db"))
+#+end_src  
+#+begin_src lisp
+  (get-transaction "0xeca4233a2ef466e3d311510f391f93d3e783cb050deea755fec5d3ffa1d8bf5c"
+                   :unanchored t
+                   :event_limit 5
+                   :event_offset 1)
+#+end_src
+#+begin_src lisp
+  (get-raw-transaction "0xef7e5b73e6cc55140c5374ce21bc4454476ed0650676cc9c653740b7d2fb4c4a")
+#+end_src
+#+begin_src lisp
+  (transactions-by-block-hash "0x589f73b5cb3f14ae96a9413dfc78fe2e59eff6bd4ddfe76746578884246dd63f")
+#+end_src  
+#+begin_src lisp
+  (transactions-by-block-height 1540
+                                :limit 10
+                                :offset 3
+                                :unanchored nil)
+#+end_src
+#+begin_src lisp
+  (transactions-for-address "SP22PCWZ9EJMHV4PHVS0C8H3B3E4Q079ZHY6CXDS1")
+#+end_src
+
+** Not working
+- REST GET:
+  - Non-Fungible Tokens metadata functions (non-fungible-tokens-metadata-list & non-fungible-tokens-metadata-for-contract-id)
+    are not activated on public hiro node
+- POST requests:
+  - faucet: add-testnet-btc-tokens-to-address
+    fees: get-approximate-fees-for-the-given-transaction
+  - rosetta: (only get-list-of-available-networks working)
+  - Smart Contracts: get-specific-data-map-inside-a-contract, call-read-only-function
+  - Transactions: broadcast-raw-transaction
+- Websocket: real-time updates for
+  - account-transactions
+  - recent blocks
+  - recent-microblocks
+  - mempool-transactions
+
+** Potential Future Ideas
+- JSON output validation
+- warn if there are no results
+- advanced input validation
+- query specific parts of contracts: (get-read-only-functions, get-maps, etc.)
+- more detailed analysis (and tracking?) for [[https://github.com/stacksgov/sips/blob/main/sips/sip-009/sip-009-nft-standard.md][SIP 09]] Non-fungible token and
+  [[https://github.com/stacksgov/sips/blob/main/sips/sip-010/sip-010-fungible-token-standard.md][SIP 10]] fungible tokens.
+- contract interaction (functions, variables, maps, token)
+- creating valid signed transactions
+- connect to a [[https://docs.hiro.so/get-started/running-api-nodelocal][local API node]]
+- cross validation with local bitcoin node (https://github.com/rodentrabies/bp)
+
+
+** Call for collaboration
+Feel free to contribute by opening issues, pull request, feature requests etc.
+Your help is much appreciated.
+
+** Copyright
+
+(C) 2022 Kilian M. Haemmerle (kilian.haemmerle@protonmail.com)
+
+** License
+
+Licensed under the AGPLv3 License.
