@@ -22,9 +22,9 @@ The official Documentation can be found on [[https://hirosystems.github.io/stack
 
 ** Installation
 
-This library is not yet on quicklisp/ultralisp.
-You need to put it in the local-project folder visible to quicklisp
-and then load it via:
+This library is now on [[https://ultralisp.org/][Ultralisp]] (not yet on quicklisp).
+You can either set up Ultralisp or put it manually in the local-project folder
+(or any other folder visible to quicklisp) and then load it via:
 #+begin_src lisp
   (ql:quickload :stacks-api)
 #+end_src
