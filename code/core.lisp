@@ -44,8 +44,8 @@
     (car (remove nil
                  (mapcar (lambda (x)
                            (case (get-slot x 'type)
-                                 ((transaction-list type-list asset-identifier-list) x)
-                                 (otherwise nil)))
+                             ((transaction-list type-list asset-identifier-list) x)
+                             (otherwise nil)))
                          query-symbols)))))
 
 (defmacro get-query (query-symbols)
@@ -58,7 +58,7 @@
             `(append (iter (for x in ,array-symbol)
                            (collect (cons ,(downcase (symbol-name array-symbol)) x)))
                      ,list-alist)
-          list-alist)))
+            list-alist)))
 
 (defmacro get-path-list (path-symbols)
   "All parameters need to be strings for quri.
