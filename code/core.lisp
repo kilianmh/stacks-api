@@ -16,7 +16,7 @@
   (iter (for (key value) on query by #'cddr)
         (when value (collect (cons (downcase (symbol-name key)) value)))))
 
-(eval-when t
+(eval-always
   (defun* (get-list-to-alist -> proper-list) ((all-symbols proper-list))
     "Prepare processing of integers and boolean parameter to strings"
     `(list-to-alist ,@(mapcan (lambda (x) (case (get-slot x 'type)
@@ -78,7 +78,7 @@
        (,request-type uri :content ,content)
        (parse (,request-type uri :content ,content) :as *output*)))
 
-(eval-when t
+(eval-always
   (defun* (get-symbols-from-list -> proper-list) ((list proper-list))
     "Extract all symbols from a list"
     (remove nil `(,@(mapcar (lambda (x) (if (typep x 'symbol)
@@ -121,7 +121,7 @@
              (declare (uri-https uri))
              (stacks-request post ,content)))))
 
-(eval-when t
+(eval-always
   (defparameter* (all-function-symbols proper-list)
       (remove nil `(,@(mapcar (lambda (x) 
                                 (if (boundp x) 

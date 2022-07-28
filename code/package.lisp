@@ -9,8 +9,8 @@
                 #:post)
   (:shadowing-import-from #:closer-mop
                           #:defclass)
-  (:shadowing-import-from #:enhanced-eval-when
-                          #:eval-when)
+  (:import-from #:enhanced-eval-when
+                #:eval-always)
   (:import-from #:trivial-types
                 #:proper-list #:association-list)
   (:import-from #:trivial-utilities

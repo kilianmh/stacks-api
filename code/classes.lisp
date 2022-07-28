@@ -7,7 +7,7 @@
             (,parameter)
             "~A is not a valid ~A" ,parameter (downcase (symbol-name ',parameter)))))
 
-(eval-when t
+(eval-always
   (defun character-array (&rest numbers)
     "Generate (simple-array character ...) declarations for all supplied numbers"
     (flet ((get-simple-array-character (number)
