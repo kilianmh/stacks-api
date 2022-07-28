@@ -8,11 +8,12 @@
             "~A is not a valid ~A" ,parameter (downcase (symbol-name ',parameter)))))
 
 (eval-always
-  (defun character-array (&rest numbers)
-    "Generate (simple-array character ...) declarations for all supplied numbers"
-    (flet ((get-simple-array-character (number)
-             `(simple-array character (,number))))
-      (mapcar #'get-simple-array-character numbers))))
+ (defun get-simple-array-character (number)
+   `(simple-array character (,number)))
+
+ (defun character-array (&rest numbers)
+   "Generate (simple-array character ...) declarations for all supplied numbers"
+   (mapcar #'get-simple-array-character numbers)))
 
 (defclass parameter ()
   ((name :initarg :name)
@@ -260,15 +261,17 @@ Enabling this option can affect performance and response times.")
 (deftype type-list ()
   `(and proper-list (satisfies type-list-predicate)))
 
+(defun* type-test ((type type-length))
+  (*let ((enumerated-types proper-list '("coinbase" "token_transfer"
+                                         "smart_contract" "contract_call"
+                                         "poison_microblock")))
+        (or (member type enumerated-types :test #'string=)
+            (warn "~S is not a proper type identicator. Enumerated types are: ~S"
+                  type
+                  (join " " enumerated-types)))))
+
 (defun* (type-list-predicate -> t) ((type-list proper-list))
-  (*let ((enumerated-types proper-list
-                           '("coinbase" "token_transfer" "smart_contract" "contract_call" "poison_microblock")))
-        (flet* ((type-test ((type type-length))
-                           (or (member type enumerated-types :test #'string=)
-                               (warn "~S is not a proper type identicator. Enumerated types are: ~S"
-                                     type
-                                     (join " " enumerated-types)))))
-               (check-standardized type-list (every #'type-test type-list)))))
+        (check-standardized type-list (every #'type-test type-list)))
 
 (make-parameter type[] type-list
                 "Items Enum: \"coinbase\" \"token_transfer\" \"smart_contract\" \"contract_call\" \"poison_microblock\"
