@@ -10,7 +10,8 @@
                      - static type checking & further input validation"
   :source-control (:git "https://codeberg.org/kilianmh/stacks-api.git")
   :depends-on (closer-mop jonathan serapeum dexador str quri iterate
-                          defstar enhanced-eval-when trivial-types trivial-utilities)
+                          defstar enhanced-eval-when trivial-types trivial-utilities
+                          named-readtables mstrings)
   :pathname "code/"
   :serial t
   :components ((:file "package") (:file "classes") (:file "core"))

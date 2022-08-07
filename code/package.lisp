@@ -27,6 +27,10 @@
                 #:parse)
   (:import-from #:iterate
                 #:iter #:for #:collect)
+  (:import-from #:named-readtables
+                #:in-readtable)
+  (:import-from #:mstrings
+                #:mstring-syntax)
   (:export #:*output*
            #:*network*
 
