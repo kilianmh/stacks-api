@@ -1,5 +1,7 @@
 (in-package #:stacks-api)
 
+(in-readtable mstring-syntax)
+
 (defmacro check-standardized (parameter assertions)
   "Assertion checking template."
   `(null
@@ -185,7 +187,7 @@
          (null (third splitted-asset-identifier)))))
 
 (make-parameter asset_identifier asset-identifier
-                "Example: asset_identifier=SP2X0TZ59D5SZ8ACQ6YMCHHNR2ZN51Z32E2CJ173.the-explorer-guild::The-Explorer-Guild
+                #M"Example: asset_identifier=SP2X0TZ59D5SZ8ACQ6YMCHHNR2ZN51Z32E2CJ173.the-explorer-guild::The-Explorer-Guild
                              token asset class identifier")
 
 (deftype domain-name () 
@@ -211,7 +213,7 @@
    (assure positive-fixnum (parse-integer positive-integer-string))))
 
 (make-parameter until_block positive-integer-string
-                "returned data representing the state up until that point in time,
+                #M>"returned data representing the state up until that point in time,
                                                rather than the current block.")
 
 ;; boolean
@@ -220,7 +222,7 @@
 (make-parameter stacking boolean
                 "Request the amount of STX tokens needed for individual address stacking")
 (make-parameter tx_metadata boolean
-                "whether or not to include the complete transaction metadata instead of just tx_id.
+                #M>"whether or not to include the complete transaction metadata instead of just tx_id.
 Enabling this option can affect performance and response times.")
 (make-parameter include_metadata boolean
                 "This includes the detailed data for particular hash in the response")
@@ -231,7 +233,7 @@ Enabling this option can affect performance and response times.")
 (make-parameter block_height positive-fixnum "block height")
 (make-parameter proof non-negative-fixnum "Returns object without the proof field if set to 0")
 (make-parameter page positive-fixnum
-                "Example: page=23
+                #M"Example: page=23
                        names are returned in pages of size 100, so specify the page number. /
                                the page (in 20-entry pages) of the history to fetch")
 (make-parameter event_offset non-negative-fixnum "The number of events to skip")
@@ -244,7 +246,7 @@ Enabling this option can affect performance and response times.")
 
 (make-parameter burn_block_height bitcoin-block-height  "Height of the burn chain block")
 (make-parameter estimated_len positive-fixnum
-                "estimation of the final length (in bytes) of the transaction,
+                #M"estimation of the final length (in bytes) of the transaction,
   including any post-conditions and signatures")
 
 (deftype transaction-list ()
@@ -274,7 +276,7 @@ Enabling this option can affect performance and response times.")
         (check-standardized type-list (every #'type-test type-list)))
 
 (make-parameter type[] type-list
-                "Items Enum: \"coinbase\" \"token_transfer\" \"smart_contract\" \"contract_call\" \"poison_microblock\"
+                #M"Items Enum: \"coinbase\" \"token_transfer\" \"smart_contract\" \"contract_call\" \"poison_microblock\"
                        Filter by transaction type")
 
 (deftype asset-identifier-list ()
@@ -285,7 +287,7 @@ Enabling this option can affect performance and response times.")
                       (every #'asset-identifier-p asset-identifier-list)))
 
 (make-parameter asset_identifiers[] asset-identifier-list
-                "Array of strings
+                #M>"Array of strings
   Example: asset_identifiers=SPQZF23W7SEYBFG5JQ496NMY0G7379SRYEDREMSV.Candy::candy
   identifiers of the token asset classes to filter for")
 
@@ -311,7 +313,7 @@ Enabling this option can affect performance and response times.")
                    ("/extended/v1/address/" principal "/stx")
                    (unanchored until_block))
 (make-get-function get-account-transactions
-                   "Retrieves a list of all Transactions for a given Address or Contract Identifier. More information on Transaction types can be found here.
+                   #M"Retrieves a list of all Transactions for a given Address or Contract Identifier. More information on Transaction types can be found here.
                        If you need to actively monitor new transactions for an address or contract id, we highly recommend subscribing to WebSockets or Socket.io for real-time updates."
                    ("/extended/v1/address/" principal "/transactions")
                    (limit offset height unanchored until_block))
@@ -336,7 +338,7 @@ Enabling this option can affect performance and response times.")
                    ("/extended/v1/address/" principal "/stx_inbound")
                    (limit offset height unanchored until_block))
 (make-get-function get-account-info
-                   "Retrieves the account data for a given Account or a Contract Identifier
+                   #M"Retrieves the account data for a given Account or a Contract Identifier
                             Where balance is the hex encoding of a unsigned 128-bit integer (big-endian), nonce is an unsigned 64-bit integer, and the proofs are provided as hex strings.
                             For non-existent accounts, this does not return a 404 error, rather it returns an object with balance and nonce of 0."
                    ("/v2/accounts/" principal)
@@ -344,7 +346,7 @@ Enabling this option can affect performance and response times.")
 
 ;; block functions
 (make-get-function get-recent-blocks
-                   "Retrieves a list of recently mined blocks
+                   #M"Retrieves a list of recently mined blocks
                        If you need to actively monitor new blocks, we highly recommend subscribing to WebSockets or Socket.io for real-time updates."
                    ("/extended/v1/block")
                    (limit offset))
@@ -392,13 +394,13 @@ Enabling this option can affect performance and response times.")
                    nil)
 
 (make-get-function get-the-network-target-block-time
-                   "Retrieves the target block times for mainnet and testnet.
+                   #M"Retrieves the target block times for mainnet and testnet.
    The block time is hardcoded and will change throughout the implementation phases of the testnet."
                    ("/extended/v1/info/network_block_times")
                    nil)
 
 (make-get-function get-a-given-network-target-block-time
-                   "Retrieves the target block time for a given network. The network can be mainnet or testnet.
+                   #M"Retrieves the target block time for a given network. The network can be mainnet or testnet.
                    The block time is hardcoded and will change throughout the implementation phases of the testnet."
                    ("/extended/v1/info/network_block_time/" network)
                    nil)
@@ -468,7 +470,7 @@ Enabling this option can affect performance and response times.")
                    ("/v1/names/" name "/subdomains")
                    nil)
 (make-get-function get-zone-file
-                   "Retrieves a user’s raw zone file. This only works for RFC-compliant zone files.
+                   #M"Retrieves a user’s raw zone file. This only works for RFC-compliant zone files.
                    This method returns an error for names that have non-standard zone files."
                    ("/v1/names/" name "/zonefile")
                    nil)
@@ -484,19 +486,19 @@ Enabling this option can affect performance and response times.")
 ;; Non-Fungible Tokens processing not activated on api server
 ;; required query-parameters
 (make-get-function non-fungible-token-holdings
-                   "Retrieves the list of Non-Fungible Tokens owned by the given principal (STX address or Smart Contract ID).
+                   #M"Retrieves the list of Non-Fungible Tokens owned by the given principal (STX address or Smart Contract ID).
     Results can be filtered by one or more asset identifiers and can include metadata about the transaction that made the principal own each token."
                    ("/extended/v1/tokens/nft/holdings")
                    (principal asset_identifiers[] limit offset unanchored tx_metadata))
 
 (make-get-function non-fungible-token-history
-                   "Retrieves all events relevant to a Non-Fungible Token.
+                   #M>"Retrieves all events relevant to a Non-Fungible Token.
   Useful to determine the ownership history of a particular asset."
                    ("/extended/v1/tokens/nft/history")
                    (asset_identifier value limit offset unanchored tx_metadata))
 
 (make-get-function non-fungible-token-mints
-                   "Retrieves all mint events for a Non-Fungible Token asset class.
+                   #M>"Retrieves all mint events for a Non-Fungible Token asset class.
 Useful to determine which NFTs of a particular collection have been claimed."
                    ("/extended/v1/tokens/nft/mints")
                    (asset_identifier limit offset unanchored tx_metadata))
@@ -513,7 +515,7 @@ Useful to determine which NFTs of a particular collection have been claimed."
                    ("/extended/v1/contract/" contract_id)
                    (unanchored))
 (make-get-function get-contracts-by-trait
-                   "Retrieves a list of contracts based on the following traits listed in JSON format
+                   #M>"Retrieves a list of contracts based on the following traits listed in JSON format
                    - functions, variables, maps, fungible tokens and non-fungible tokens"
                    ("/extended/v1/contract/by_trait")
                    (trait_abi limit offset))
@@ -558,12 +560,12 @@ Useful to determine which NFTs of a particular collection have been claimed."
                    ("/extended/v1/tx/")
                    (limit offset type[] unanchored))
 (make-get-function get-mempool-transactions
-                   "Retrieves all transactions that have been recently broadcast to the mempool.
+                   #M>"Retrieves all transactions that have been recently broadcast to the mempool.
                    These are pending transactions awaiting confirmation."
                    ("/extended/v1/tx/mempool")
                    (sender_address recipient_address address limit offset unanchored))
 (make-get-function get-dropped-mempool-transactions
-                   "Retrieves all recently-broadcast transactions that have been dropped from the mempool.
+                   #M>"Retrieves all recently-broadcast transactions that have been dropped from the mempool.
                    Transactions are dropped from the mempool if: they were stale and awaiting garbage collection
                    or, were expensive, or were replaced with a new fee"
                    ("/extended/v1/tx/mempool/dropped")
@@ -612,7 +614,7 @@ Useful to determine which NFTs of a particular collection have been claimed."
 
 ;; Faucets
 (make-post-function get-stx-testnet-tokens
-                    "Add 500 STX tokens to the specified testnet address. Testnet STX addresses begin with ST. If the stacking parameter is set to true, the faucet will add the required number of tokens for individual stacking to the specified testnet address.
+                    #M"Add 500 STX tokens to the specified testnet address. Testnet STX addresses begin with ST. If the stacking parameter is set to true, the faucet will add the required number of tokens for individual stacking to the specified testnet address.
                          The endpoint returns the transaction ID, which you can use to view the transaction in the Stacks Explorer. The tokens are delivered once the transaction has been included in an anchor block.
                          A common reason for failed faucet transactions is that the faucet has run out of tokens. If you are experiencing failed faucet transactions to a testnet address, you can get help in Discord.
                          Note: This is a testnet only endpoint. This endpoint will not work on the mainnet."

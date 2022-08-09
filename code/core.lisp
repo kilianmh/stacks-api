@@ -1,5 +1,7 @@
 (in-package #:stacks-api)
 
+(in-readtable mstring-syntax)
+
 (defun* (get-host -> (simple-array character (33))) ()
   "Generate host string for mainnet and testnet"
   (cond ((string= *network* "mainnet") "stacks-node-api.mainnet.stacks.co")
@@ -49,8 +51,8 @@
                          query-symbols)))))
 
 (defmacro get-query (query-symbols)
-  "Generate code for handling of query parameters. 
-   Result is different for an array/list parameters."
+  #M"Generate code for handling of query parameters. 
+    Result is different for an array/list parameters."
   (*let ((array-symbol symbol (get-array-symbol query-symbols))
          (query-symbols proper-list (remove array-symbol query-symbols))
          (list-alist proper-list (get-list-to-alist query-symbols)))
@@ -61,8 +63,8 @@
             list-alist)))
 
 (defmacro get-path-list (path-symbols)
-  "All parameters need to be strings for quri.
-   Number parameters are therefore converted at run time to string."
+  #M"All parameters need to be strings for quri.
+    Number parameters are therefore converted at run time to string."
   `(concat ,@(mapcar (lambda (x)
                        (if (stringp x)
                            x
