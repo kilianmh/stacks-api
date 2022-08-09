@@ -2,13 +2,6 @@
 
 (in-readtable mstring-syntax)
 
-(defmacro check-standardized (parameter assertions)
-  "Assertion checking template."
-  `(null
-    (assert ,assertions
-            (,parameter)
-            "~A is not a valid ~A" ,parameter (downcase (symbol-name ',parameter)))))
-
 (eval-always
  (defun get-simple-array-character (number)
    `(simple-array character (,number)))
@@ -60,21 +53,19 @@
   '(and stacks-address-length (satisfies stacks-address-predicate)))
 
 (defun* (stacks-address-predicate -> t) ((stacks-address stacks-address-length))
-  (check-standardized
-   stacks-address
-   (or (null stacks-address)
-       (*let ((stacks-address-length (integer 29 41) (length stacks-address)))
-             (cond
-               ((and (= stacks-address-length 29)
-                     (string/= stacks-address "SP000000000000000000002Q6VF78"))
-                (error "The Stacks address ~S is not the genesis address" stacks-address))
-               ((string= *network* "mainnet")
-                (or (starts-with-p "SP" stacks-address)
-                    (error "The stacks mainnet address ~S does not start with \"SP\"" stacks-address)))
-               ((string= *network* "testnet")
-                (or (starts-with-p "ST" stacks-address)
-                    (error "The stacks testnet address ~S does not start with \"ST\"" stacks-address)))
-               (t t))))))
+  (or (null stacks-address)
+      (*let ((stacks-address-length (integer 29 41) (length stacks-address)))
+            (cond
+              ((and (= stacks-address-length 29)
+                    (string/= stacks-address "SP000000000000000000002Q6VF78"))
+               (error "The Stacks address ~S is not the genesis address" stacks-address))
+              ((string= *network* "mainnet")
+               (or (starts-with-p "SP" stacks-address)
+                   (error "The stacks mainnet address ~S does not start with \"SP\"" stacks-address)))
+              ((string= *network* "testnet")
+               (or (starts-with-p "ST" stacks-address)
+                   (error "The stacks testnet address ~S does not start with \"ST\"" stacks-address)))
+              (t t)))))
 
 (make-parameter sender_address stacks-address
                 "Filter to only return transactions with this sender address.")
@@ -91,11 +82,9 @@
 
 (defun* (stacks-bitcoin-address-predicate -> t)
     ((stacks-bitcoin-address (or stacks-address-length bitcoin-address-length)))
-  (check-standardized
-   stacks-bitcoin-address     
-   (if (= (length stacks-bitcoin-address) (or 40 41))
-       (stacks-address-predicate stacks-bitcoin-address)
-       t)))
+  (if (= (length stacks-bitcoin-address) (or 40 41))
+      (stacks-address-predicate stacks-bitcoin-address)
+      t))
 
 (make-parameter address stacks-bitcoin-address "address")
 
@@ -103,11 +92,9 @@
 (deftype contract () '(and string (satisfies contract-predicate)))
 
 (defun* (contract-predicate -> t) ((contract string))
-  (check-standardized
-   contract
    (*let ((splitted-contract proper-list (split "." contract)))
-         (assure stacks-address (first splitted-contract))
-         (null (third splitted-contract)))))
+         (serapeum:assuref (first splitted-contract) stacks-address)
+         (null (third splitted-contract))))
 
 (make-parameter contract_id contract
                 "Contract identifier formatted as <contract_address>.<contract_name>")
@@ -116,12 +103,11 @@
 (deftype principal () `(and string (satisfies principal-predicate)))
 
 (defun* (principal-predicate -> t) ((principal string))
-  (check-standardized principal
-                      (*let ((splitted-principal proper-list (split "." principal)))
-                            (case (length splitted-principal)
-                              (1 (stacks-address-predicate (first splitted-principal)))
-                              (2 (contract-predicate principal))
-                              (otherwise (error "~S has too many dots (.)" principal))))))
+  (*let ((splitted-principal proper-list (split "." principal)))
+        (case (length splitted-principal)
+          (1 (stacks-address-predicate (first splitted-principal)))
+          (2 (contract-predicate principal))
+          (otherwise (error "~S has too many dots (.)" principal)))))
 
 (make-parameter principal principal
                 "Stacks address or a Contract identifier (e.g. SP31DA6FTSJX2WGTZ69SFY11BH51NZMB0ZW97B5P0.get-info)")
@@ -131,9 +117,8 @@
   `(and (simple-array character (,length)) (satisfies hash-predicate)))
 
 (defun* (hash-predicate -> t) ((hash (simple-array character (*))))
-  (check-standardized hash
-                      (or (starts-with-p "0x" hash)
-                          (warn "~S does not start with \"0x\"" hash))))
+  (or (starts-with-p "0x" hash)
+      (warn "~S does not start with \"0x\"" hash)))
 
 (make-parameter tx_id (hash 66) "Transaction id")
 (make-parameter block_hash (hash 66) "block hash")
@@ -154,9 +139,8 @@
 (defun* (top-level-domain-predicate -> t) ((top-level-domain top-level-domain-length))
   (*let ((top-level-domain-list list '("app" "blockstack" "btc" "graphite" "helloworld"
                                        "id" "miner" "mining" "podcast" "stacking" "stacks" "stx")))
-        (check-standardized top-level-domain
-                            (or (member top-level-domain top-level-domain-list :test #'string=)
-                                (error "~S is not a top level domain identifier valid values are: ~A" top-level-domain (join " " top-level-domain-list))))))
+        (or (member top-level-domain top-level-domain-list :test #'string=)
+            (error "~S is not a top level domain identifier valid values are: ~A" top-level-domain (join " " top-level-domain-list)))))
 
 (make-parameter tld top-level-domain "top level domain namespace")
 
@@ -168,10 +152,9 @@
 
 (defun* (blockchain-predicate -> t) ((blockchain blockchain-length))
   (*let ((blockchain-list proper-list '("bitcoin" "stacks")))
-        (check-standardized blockchain
-                            (or (member blockchain blockchain-list :test #'string=)
-                                (warn "~S is not a blockchain identifier. valid blockchain enumerators are: ~A"
-                                      blockchain (join " " blockchain-list))))))
+        (or (member blockchain blockchain-list :test #'string=)
+            (warn "~S is not a blockchain identifier. valid blockchain enumerators are: ~A"
+                  blockchain (join " " blockchain-list)))))
 
 
 (make-parameter blockchain blockchain "The layer-1 blockchain for the address. Example: stacks.")
@@ -180,11 +163,9 @@
   '(and string (satisfies asset-identifier-p))) 
 
 (defun* (asset-identifier-p -> t) ((asset-identifier string))
-  (check-standardized
-   asset-identifier
-   (*let ((splitted-asset-identifier proper-list (split "::" asset-identifier)))
-         (assure contract (first splitted-asset-identifier))
-         (null (third splitted-asset-identifier)))))
+  (*let ((splitted-asset-identifier proper-list (split "::" asset-identifier)))
+        (assure contract (first splitted-asset-identifier))
+        (null (third splitted-asset-identifier))))
 
 (make-parameter asset_identifier asset-identifier
                 #M"Example: asset_identifier=SP2X0TZ59D5SZ8ACQ6YMCHHNR2ZN51Z32E2CJ173.the-explorer-guild::The-Explorer-Guild
@@ -195,11 +176,9 @@
 
 (defun* (name-p -> t) ((name string))
   "Name predicate checking"
-  (check-standardized
-   name
-   (*let ((splitted-name proper-list (split "." name)))
-         (assure top-level-domain (second splitted-name))
-         (null (third splitted-name)))))
+  (*let ((splitted-name proper-list (split "." name)))
+        (assure top-level-domain (second splitted-name))
+        (null (third splitted-name))))
 
 (make-parameter name domain-name "Example: id.blockstack. fully-qualified name")
 
@@ -208,9 +187,7 @@
 
 (defun* (positive-integer-string-predicate -> t) ((positive-integer-string string))
   "Name predicate checking"
-  (check-standardized
-   positive-integer-string
-   (assure positive-fixnum (parse-integer positive-integer-string))))
+  (assure positive-fixnum (parse-integer positive-integer-string)))
 
 (make-parameter until_block positive-integer-string
                 #M>"returned data representing the state up until that point in time,
@@ -253,7 +230,7 @@ Enabling this option can affect performance and response times.")
   `(and proper-list (satisfies transaction-list-predicate)))
 
 (defun* (transaction-list-predicate -> t) ((transaction-list proper-list))
-  (check-standardized transaction-list (every #'hash-predicate transaction-list)))
+  (every #'hash-predicate transaction-list))
 
 (make-parameter tx_id[] transaction-list "Array of transaction ids")
 
@@ -273,7 +250,7 @@ Enabling this option can affect performance and response times.")
                   (join " " enumerated-types)))))
 
 (defun* (type-list-predicate -> t) ((type-list proper-list))
-        (check-standardized type-list (every #'type-test type-list)))
+  (every #'type-test type-list))
 
 (make-parameter type[] type-list
                 #M"Items Enum: \"coinbase\" \"token_transfer\" \"smart_contract\" \"contract_call\" \"poison_microblock\"
@@ -283,8 +260,7 @@ Enabling this option can affect performance and response times.")
   `(and proper-list (satisfies asset-identifier-list-predicate)))
 
 (defun* (asset-identifier-list-predicate -> t) ((asset-identifier-list proper-list))
-  (check-standardized asset-identifier-list
-                      (every #'asset-identifier-p asset-identifier-list)))
+  (every #'asset-identifier-p asset-identifier-list))
 
 (make-parameter asset_identifiers[] asset-identifier-list
                 #M>"Array of strings
